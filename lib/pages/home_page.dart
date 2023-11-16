@@ -28,14 +28,40 @@ class _HomePageState extends State<HomePage> {
       body:  ValueListenableBuilder(
         valueListenable: Boxes.getData().listenable(),
         builder: (context, box, child) {
-           List<dynamic> data = box.values.toList();
+           var data = box.values.toList().cast<NotesModel>();
           return ListView.builder(
             itemCount: box.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                 title: Text(data[index].title.toString()),
-                 subtitle: Text(data[index].description.toString()),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                child: Card(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
 
+                        children: [
+                          Text(data[index].title.toString(), style: TextStyle(fontSize: 18),),
+                          Spacer(),
+                          InkWell(
+                            onTap: () {
+                              _update(data[index] , data[index].title.toString(), data[index].description.toString()) ;
+                            },
+                              child: Icon(Icons.edit)),
+                          SizedBox(width: 15,) ,
+                          InkWell(
+                            onTap: () {
+                              delete(data[index]) ;
+                            },
+                              child: Icon(Icons.delete)),
+                        ],
+                      ),
+                      Text(data[index].description.toString()),
+                    ],
+                  ),
+
+
+                ),
               ) ;
             },);
         },
@@ -65,7 +91,8 @@ class _HomePageState extends State<HomePage> {
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20)
                       )
                     ),
@@ -74,7 +101,8 @@ class _HomePageState extends State<HomePage> {
                   TextField(
                     controller: descriptionController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20)
                       )
                     ),
@@ -109,6 +137,82 @@ class _HomePageState extends State<HomePage> {
 
 
 
+  }
+
+
+  Future<void> _update(NotesModel notesModel, String title, String description) async{
+
+
+    titleController.text = title ;
+    descriptionController.text = description ;
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+
+          return AlertDialog(
+            title:  Text('Add Notes'),
+            content:  SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20)
+                      )
+                    ),
+                  ),
+                  SizedBox(height: 10,),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20)
+                      )
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () {
+                Navigator.pop(context) ;
+              },
+                  child: const Text('Canecl')),
+              TextButton(onPressed: () {
+
+                notesModel.title = titleController.text ;
+                notesModel.description = descriptionController.text ;
+
+
+                notesModel.save() ;
+
+
+                titleController.clear();
+                descriptionController.clear();
+
+
+
+                Navigator.pop(context) ;
+              },
+                  child: Text('Update')),
+            ],
+          );
+        },) ;
+
+
+
+
+  }
+
+
+
+
+  Future<void> delete (NotesModel notesModel) async {
+    notesModel.delete() ;
   }
 
 

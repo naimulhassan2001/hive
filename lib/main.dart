@@ -9,8 +9,9 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   var directory = await getApplicationCacheDirectory();
   Hive.init(directory.path);
-  Hive.openBox('Naimul') ;
   Hive.registerAdapter(NotesModelAdapter());
+  await Hive.openBox<NotesModel>('naimul') ;
+
   runApp(const MyApp());
 }
 
